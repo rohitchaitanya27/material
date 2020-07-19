@@ -1,0 +1,78 @@
+- name: deployment
+  hosts: all
+  become: true
+
+  tasks:
+    -  name: check java version
+       shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+       register: java_version 
+
+    -  debug:
+         var=java_version
+
+    -  debug:
+         msg: Java is not installed install Java in next task
+       when: java_version.stdout == ""
+
+    -  debug:
+         msg: java is installed, skipping instalation of java
+       when: java_version.stdout != ""
+
+    -  name: install java
+       yum:
+         name: java
+         state: installed
+       when: java_version.stdout == ""
+    
+    -  name: check maven version
+       shell: mvn --version 2>&1 | grep version | awk '{print $3}' | sed 's/"//g'
+       register: mvn_version
+
+    -  debug:
+         var: mvn_version
+    
+    -  debug:
+         msg: maven is not installed, installing maven in next task
+       when: mvn_version.stdout == ""
+
+    -  debug:
+         msg: maven is installed, skiping maven installation in next step
+       when: mvn_version.stdout != ""
+
+    -  name: maven instalation step
+       yum: 
+         name: maven
+         state: installed
+       when: mvn_version.stdout == ""
+
+    -  name: check tomcat dir
+       stat:
+         path: /usr/share/tomcat
+       register: tomcat_result
+
+    -  debug:
+         var: tomcat_result
+
+    -  name: install tomcat if not availble
+       yum:
+         name: tomcat
+         state: installed
+       when: tomcat_result.stat.exists == false
+
+    -  name: check again tomcat dir
+       stat:
+         path: /usr/share/tomcat
+       register: tomcat_stat
+ 
+    -  name: start tomcat service
+       service:
+         name: tomcat
+         state: restarted
+       when: tomcat_stat.stat.exists == true
+
+       
+
+
+
+
+

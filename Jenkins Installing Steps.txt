@@ -1,0 +1,48 @@
+﻿                       
+JENKINS INSTALLATION PROCESS
+
+AMI : CentOS 7.6.1810 x86_64 with cloud-init (HVM) -
+                      or
+AMI : ultraserve-centos-7.4-ami-application-hvm-2018.03.3-0-x86_64-gp2-jdk1.8-1.8.0_191 (ami-023688e3726226689)
+		      or
+AMI : CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-05713873c6794f575.4
+
+
+Step 1:   
+
+Add Jenkins Repository 
+Jenkins package is not available in the default CentOS and RHEL repositories.
+So we need to add jenkins repository using the beneath commands.
+
+Install wget package
+#yum install wget
+
+# sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo 
+ 
+# sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+
+Step 2: 
+
+Install Jenkins and Java Run the below  yum command to install Jenkins and java. 
+
+# yum install jenkins java-1.8.0-openjdk –y
+		or
+# yum install java-1.8.0-openjdk -y
+# yum install jenkins -y
+
+Step 3: 
+
+Start and Enable Jenkins Service Run the following systemctl commands to start and enable the jenkins service
+# systemctl start jenkins
+# systemctl enable jenkins
+
+Install maven
+# yum install maven -y
+
+check java & maven versions
+java -version
+mvn --version
+
+copy jenkins instance public ip and paste in browser --> <ip>:8080
+
+11b85f0100c61f3116294225846aee0756

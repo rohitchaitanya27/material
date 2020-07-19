@@ -1,0 +1,49 @@
+                                      SRISH SOFTWARE TECHNOLOGIES LLP, KPHB, HYDERABAD
+                                               RAJESH -- 9948867777
+					      rajesh@srishsoft.com
+
+JFROG INSTALLATION PROCESS
+
+AMI : CentOS 7.6.1810 x86_64 with cloud-init (HVM) -
+                      or
+AMI : ultraserve-centos-7.4-ami-application-hvm-2018.03.3-0-x86_64-gp2-jdk1.8-1.8.0_191 (ami-023688e3726226689)
+		      or
+AMI : CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-05713873c6794f575.4
+
+Launch t2-medium EC2 Instance (centOS)
+
+yum update -y
+
+yum install java -y
+
+java -version
+
+export JAVA_HOME=<java installed path>
+
+export PATH=$PATH:$JAVA_HOME/bin
+
+curl -sL https://bintray.com/jfrog/artifactory-rpms/rpm | sudo tee /etc/yum.repos.d/bintray-jfrog-artifactory-rpms.repo 
+
+yum -y install jfrog-artifactory-cpp-ce wget 
+
+echo "export ARTIFACTORY_HOME=/opt/jfrog/artifactory" | sudo tee -a /etc/profile
+
+source /etc/profile
+
+env | grep ARTIFACTORY_HOME 
+
+export PATH=$PATH:$ARTIFACTORY_HOME/bin  
+
+systemctl start artifactory.service
+
+systemctl enable artifactory.service
+
+copy public ip of instance and hit in browser --> http://<public ip>:8081
+         enter user name --> admin
+		password --> password
+
+
+Jenkins -- JFROG
+
+http://<public ip>:8082/artifactory
+

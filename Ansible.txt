@@ -1,0 +1,173 @@
+Launch 3 Centos instances. 1 for master, 2 for slaves
+
+AMI : CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-05713873c6794f575.4
+
+login to master, Slave-1 & Slave-2 using centos user
+
+perform update
+# sudo su root
+# cd /
+# yum update -y
+
+generate key
+# ssh-keygen
+
+copy key from ansible and paste in authorised_key file in slaves
+
+Perform SSH communication between master & slave using
+# ssh centos@<ip address of slave - 1>
+# ssh centos@<ip address of slave - 2>
+
+check python version
+# python --version
+
+install ansible
+# yum install ansible -y
+
+Add IP address of slaves to /etc/ansible/hosts
+
+change to ansible user
+# su - ansible
+
+perform ping to slaves using ansible
+$ ansible all -m ping --> fails in execution
+$ ansible all -m ping --user centos --> successful in connecting
+
+change remote_user in ansible_config as centos
+$ ansible all -m ping
+
+------------------------------ Sample Play Book -----------------
+- name: add user
+  hosts: all_hosts
+  become: true
+  become_method: sudo
+  become_user: root
+
+  tasks:
+     - user:
+        name: raja
+        groups: ansadmin
+
+========================== TILL NOW ANSIBLE INSTALLING AND CONNECTING TO CLIENTS =======================
+
+
+========================== NOW Implementing process ======================
+
+=== GIT -> JENKINS -> ANSIBLE --> SLAVES
+
+Jenkins & Ansible will be in same server/instance
+
+Writing Groovy Scripting for implementing above process 
+
+Step - 1
+Launch Jenkins (as it is covered earlier)
+
+Change to root user
+$ sudo su root
+
+set password for root user
+# passwd root (giving as root)
+
+after installing jenkins --> A jenkins user is created by system
+set password for jenkins user
+# passwd jenkins (giving as jenkins)
+
+give bash execution for jenkins user
+# usermod -s /bin/bash jenkins
+
+check python version 
+# python --version
+
+Install ansible in root User
+# yum install ansible -y
+
+check ansible version
+# ansible --version
+
+switch to jenkins user
+# su - jenkins
+
+check ansible version --> for verification of ansible is enable for jenkins user
+$ ansible --version
+
+create keys by login as jenkins user
+$ ssh-keygen
+
+--------------------------- TILL NOW JENKINS & ANSIBLE setup completed in same Insatnce ------------
+
+launch slave
+
+Copy jenkins user public key from jenkins@master to centos@slave in  
+
+give public ip of slave instance in hosts file
+vi /etc/ansible/hosts
+
+Ping from jenkins user of jenkins instance to slave
+$ ansible all -m ping --user centos
+
+Channge remote_user in etc/ansible/ansible_config
+$ ansible all -m ping
+
+After successfull ping to slave
+
+check git version
+$ git --version --> if shows version, then git is installed. otherwise install it
+
+install GIT
+$ su - root
+# yum install git -y
+# git --version
+
+-------------------------------- LAUNCH GITLAB Instance ---------------------
+write grrovy scripting file --> Jenkinsfile
+
+pipeline {
+  agent {label 'master'}
+    
+    stages {
+        stage('git clone') {
+            steps {
+                echo 'cloning git repo'
+                git 'http://ec2-13-231-201-5.ap-northeast-1.compute.amazonaws.com/root/ansiblejob.git'
+            }
+        }
+        
+        stage('Ansible ping'){
+          steps {
+            echo 'ping to slaves'
+            sh 'ansible all -m ping'
+          }
+        }
+        
+        stage('Ansible Execution'){
+          steps {
+            echo 'execute on slaves'
+            sh 'ansible-playbook test.yml'
+          }
+        }
+    }
+}
+
+-------------------------------- write yaml scripting for ansible ---------
+
+- name: apache web server
+  hosts: all_hosts
+  become: true
+  become_method: sudo
+  become_user: root
+
+  tasks:
+     - name: httpd installing
+       command: yum install httpd -y
+       
+     - name: httpd starting
+       command: systemctl start httpd
+       
+     - name: copy file
+       copy:
+         src: index.html
+         dest: /usr/share/httpd/noindex/index.html
+
+
+Check in --> systemctl status httpd
+
